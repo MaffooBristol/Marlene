@@ -1,7 +1,7 @@
 util = require 'util'
 # twitter = require 'twitter'
 twitter = require 'twit'
-secrets = require '../data/keys.json'
+secrets = require '../data/secrets.json'
 phrases = require '../data/phrases.json'
 
 twit = new twitter secrets
@@ -26,9 +26,14 @@ module.exports =
         _response = phrases.phrases[_trigger][0]
 
         console.log tweet.id + '\n\t\t- Tweet:\t' + tweet.text + '\n\t\t- Trigger:\t' + _trigger + '\n\t\t- Response:\t' + _response
-
-        twit.post 'statuses/update', {status: '@' + tweet.user.screen_name + ' ' + _response, in_reply_to_status_id: tweet.id.toString() }, (err, data) ->
-          if data.id then console.log 'Tweet sent to ' + tweet.user.name
-
+###
+        twit.post 'statuses/update'
+          # Set post parameters.
+          status: '@' + tweet.user.screen_name + ' ' + _response
+          in_reply_to_status_id: tweet.id.toString()
+          # Callback.
+          (err, data) ->
+            if data.id then console.log 'Tweet sent to ' + tweet.user.name
+###
         # Ignore others.
         break
