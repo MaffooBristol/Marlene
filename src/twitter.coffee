@@ -13,7 +13,7 @@ module.exports =
     _phraseNamesQuoted = _phraseNames.map((a) -> return '"' + a + '"')
     _randomIndex = parseInt(Math.random() * _phraseNames.length)
 
-    twit.get 'search/tweets', q: _phraseNames[_randomIndex], (err, data) ->
+    twit.get 'search/tweets', q: _phraseNamesQuoted[_randomIndex], (err, data) ->
       for tweet in data.statuses
 
         # I *think* this is if the tweet itself has been retweeted, will investigate further.
@@ -21,6 +21,10 @@ module.exports =
 
         # Skip retweeted.
         if tweet.retweeted_status? then continue
+
+        # Sometimes RTs get through because of strange things involving quotes
+        # and stuff, so best just to ignore them.
+        if tweet.text.indexOf('RT') > -1 then continue
 
         _trigger = _phraseNames[_randomIndex]
         _response = phrases.phrases[_trigger][0]
@@ -30,10 +34,12 @@ module.exports =
         twit.post 'statuses/update',
           # Set post parameters.
           status: '@' + tweet.user.screen_name + ' ' + _response
-          in_reply_to_status_id: tweet.id.toString()
+          in_reply_to_status_id: tweet.id_str
           # Callback.
           (err, data) ->
-            if data.id then console.log 'Tweet sent to ' + tweet.user.name
+            if data.id
+              console.log 'Tweet sent to ' + tweet.user.name + '\n'
+              console.log 'Replied to ' + tweet.in_reply_to_status_id_str + '\n'
 
         # Ignore others.
         break
