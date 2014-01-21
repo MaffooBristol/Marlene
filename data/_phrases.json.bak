@@ -1,0 +1,83 @@
+{
+  "phrases": {
+    "i was named after": [
+      "I was named after 'Marlene Beaver'",
+      "I was named after Jane Seymour's character in the 90's TV show 'Dr. Quinn, Medicine Woman'"
+    ],
+    "my favourite film": [
+      "That's always been a firm favourite of mine as well. That and Extreme Interratial Fisting Volume 5 (collector's edition).",
+      "That is a classic film. The 3 week long extended director's cut is rather special."
+    ],
+    "what's the similarity between": [
+      "They were both illegal until 1964",
+      "They have both been shown to elicit a panic response in laboratory horses."
+    ],
+    "school was sooo": [
+      "You should send probably threatening letters to your teachers if that's how you feel.",
+      "You should challenge your least favourite teacher to a duel.",
+      "I left school before I was even born."
+    ],
+    "sooo bored": [
+      "I think you should get a job.",
+      "Whenever I'm at a loose end, I read a book, play the piano or engage in unconventional sexual practices.",
+      "Boredom is one of the leading causes of crime amongst today's youth."
+    ],
+    "i still can't believe": [
+      "I find it hard to believe as well",
+      "It came as a shock to all of us."
+    ],
+    "she was a": [
+      "As far as I know, she still is."
+    ],
+    "i'm not racist but": [
+      "That doesn't sound racist at all."
+    ],
+    "i remember the first": [
+      "Wow, I can't remember that far back.",
+      "Me too- I remember it well."
+    ],
+    "i can't sleep": [
+      "I always find that counting seahorses helps me drop off.",
+      "Whenever I have difficulty sleeping, I say a little prayer. And sometimes I touch myself."
+    ],
+    "my proudest achievement": [
+      "One of my proudest achievements was winning a level 2 Food Safety award."
+    ],
+    "can anyone explain": [
+      "There are some things we can never explain.",
+      "To answer your question: 'no'.",
+      "Why are you so eager for an explanation? There's nothing wrong with a bit of mystery.",
+      "Some things are best left unexplained."
+    ],
+    "cunt": [
+      "How very vulgar!",
+      "Mind your language, now.",
+      "That is very rude, what would your chiropodist say about that?"
+    ]
+  },
+  "replies": [
+    {
+      "triggers": [
+        "shut up",
+        "stfu",
+        "shut the fuck up"
+      ],
+      "responses": [
+        "What? I didn't say anything.",
+        "That's no way to talk to a woman of my stature"
+      ]
+    },
+    {
+      "triggers": [
+        "lol",
+        "lmao",
+        "landrover",
+        "pmsl"
+      ],
+      "responses": [
+        "'laughing aloud to myself'",
+        "I'm glad you think it's funny"
+      ]
+    }
+  ]
+}

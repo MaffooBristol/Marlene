@@ -1,9 +1,21 @@
-util = require 'util'
-# twitter = require 'twitter'
+util    = require 'util'
+os      = require 'os'
+fs      = require 'fs'
 twitter = require 'twit'
 argv    = require('optimist').argv
+yaml    = require('js-yaml')
+
 secrets = require '../data/secrets.json'
-phrases = require '../data/phrases.json'
+phrases = yaml.safeLoad fs.readFileSync(require('path').resolve(__dirname, '../data/phrases.yaml'), 'utf8')
+
+db      = require('mongojs').connect('marlene', ['tweets'])
+
+skip = false
+
+dbRecord =
+  started: Math.round(new Date().getTime() / 100)
+  hostname: os.hostname()
+  sent: false
 
 twit = new twitter secrets
 searchTerms = (Object.keys phrases.phrases).map((a) -> return '"' + a + '"').join ' OR '
@@ -32,19 +44,33 @@ module.exports =
 
         console.log tweet.id + '\n\t\t- Tweet:\t' + tweet.text + '\n\t\t- Trigger:\t' + _trigger + '\n\t\t- Response:\t' + _response
 
-        if argv['dry-run']? or argv.d
-          console.log '\nYou\'ve set the dry-run flag; tweet NOT sent.\n'
-          break
+        db.tweets.find {in_reply_to_status_id: tweet.id_str, sent: true}, (err, data) ->
+         if (data.length > 0)
+           console.log '\nAlready seen tweet, skipping.'
+           db.close()
+           return
 
-        twit.post 'statuses/update',
-          # Set post parameters.
-          status: '@' + tweet.user.screen_name + ' ' + _response
-          in_reply_to_status_id: tweet.id_str
-          # Callback.
-          (err, data) ->
-            if data.id
-              console.log 'Tweet sent to ' + tweet.user.name + '\n'
-              console.log 'Replied to ' + tweet.in_reply_to_status_id_str + '\n'
+          if argv['dry-run']? or argv.d
+            console.log '\nYou\'ve set the dry-run flag; tweet NOT sent.'
+          else
+            twit.post 'statuses/update',
+              # Set post parameters.
+              status: '@' + tweet.user.screen_name + ' ' + _response
+              in_reply_to_status_id: tweet.id_str
+              # Callback.
+              (err, data) ->
+                if data.id
+                  dbRecord.sent = true
+  #                dbRecord.tweet_id =
+                  console.log 'Tweet sent to ' + tweet.user.name + '\n'
+                  console.log 'Replied to ' + tweet.in_reply_to_status_id_str + '\n'
+
+          dbRecord.in_reply_to_status_id = tweet.id_str
+          dbRecord.complete = Math.round(new Date().getTime() / 100)
+          db.tweets.save dbRecord, (err) ->
+            console.log err
+          db.close()
 
         # Ignore others.
         break
+
