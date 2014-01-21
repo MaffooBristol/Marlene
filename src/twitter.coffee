@@ -1,6 +1,7 @@
 util = require 'util'
 # twitter = require 'twitter'
 twitter = require 'twit'
+argv    = require('optimist').argv
 secrets = require '../data/secrets.json'
 phrases = require '../data/phrases.json'
 
@@ -30,6 +31,10 @@ module.exports =
         _response = phrases.phrases[_trigger][0]
 
         console.log tweet.id + '\n\t\t- Tweet:\t' + tweet.text + '\n\t\t- Trigger:\t' + _trigger + '\n\t\t- Response:\t' + _response
+
+        if argv['dry-run']? or argv.d
+          console.log '\nYou\'ve set the dry-run flag; tweet NOT sent.\n'
+          break
 
         twit.post 'statuses/update',
           # Set post parameters.
