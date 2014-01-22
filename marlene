@@ -1,2 +1,4 @@
+#!/usr/bin/env node
+
 //require('coffee-script');
 var index = require('./lib/index');
