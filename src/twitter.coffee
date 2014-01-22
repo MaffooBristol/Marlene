@@ -26,7 +26,11 @@ module.exports =
     _phraseNamesQuoted = _phraseNames.map((a) -> return '"' + a + '"')
     _randomIndex = parseInt(Math.random() * _phraseNames.length)
 
+    twit.get 'statuses/mentions_timeline', q: '@teslacool1', (err, data) ->
+      console.log data
+
     twit.get 'search/tweets', q: _phraseNamesQuoted[_randomIndex], (err, data) ->
+      unless data? and data.statuses? then return false
       for tweet in data.statuses
 
         # I *think* this is if the tweet itself has been retweeted, will investigate further.
@@ -40,7 +44,8 @@ module.exports =
         if tweet.text.indexOf('RT') > -1 then continue
 
         _trigger = _phraseNames[_randomIndex]
-        _response = phrases.phrases[_trigger][0]
+        _allResponses = phrases.phrases[_trigger]
+        _response = _allResponses[Math.floor(Math.random() * _allResponses.length)]
 
         console.log tweet.id + '\n\t\t- Tweet:\t' + tweet.text + '\n\t\t- Trigger:\t' + _trigger + '\n\t\t- Response:\t' + _response
 
