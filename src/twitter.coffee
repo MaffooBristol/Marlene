@@ -3,7 +3,9 @@ os      = require 'os'
 fs      = require 'fs'
 twitter = require 'twit'
 argv    = require('optimist').argv
-yaml    = require('js-yaml')
+yaml    = require 'js-yaml'
+rollbar = require 'rollbar'
+crypto  = require 'crypto'
 db      = require('mongojs').connect('marlene', ['tweets'])
 
 secrets = if (argv.secrets?) then require '../data/' + argv.secrets else require '../data/secrets.json'

@@ -1,4 +1,5 @@
 test.php
 data/keys.json
 data/secrets.json
+data/secrets_*.json
 node_modules
