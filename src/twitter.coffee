@@ -3,14 +3,14 @@ os      = require 'os'
 fs      = require 'fs'
 twitter = require 'twit'
 argv    = require('optimist').argv
-yaml    = require 'js-yaml'
-rollbar = require 'rollbar'
-crypto  = require 'crypto'
-
-secrets = require '../data/secrets.json'
-phrases = yaml.safeLoad fs.readFileSync(require('path').resolve(__dirname, '../data/phrases.yaml'), 'utf8')
-
+yaml    = require('js-yaml')
 db      = require('mongojs').connect('marlene', ['tweets'])
+
+secrets = if (argv.secrets?) then require '../data/' + argv.secrets else require '../data/secrets.json'
+
+_phrases = if (argv.phrases?) then '../data/' + argv.phrases else '../data/phrases.yaml'
+
+phrases = yaml.safeLoad fs.readFileSync(require('path').resolve(__dirname, _phrases), 'utf8')
 
 skip = false
 
@@ -60,6 +60,7 @@ module.exports =
            console.log '\nAlready seen tweet, skipping.'
            rollbar.reportMessage 'Already seen tweet, skipping: ' + tweet.user.name + ': ' + tweet.text
            db.close()
+           rollbar.shutdown()
            return
 
           if argv['dry-run']? or argv.d
@@ -78,6 +79,8 @@ module.exports =
                   console.log 'Tweet sent to ' + tweet.user.name + '\n'
                   console.log 'Replied to ' + tweet.in_reply_to_status_id_str + '\n'
                   rollbar.reportMessage 'Tweet sent to ' + tweet.user.name + ': ' + tweet.text + ' / ' + _response
+
+          dbRecord.in_reply_to_status_id = tweet.id_str
 
           dbRecord.in_reply_to_status_id = tweet.id_str
           dbRecord.tweet_text = crypto.createHash('md5').update(tweet.text).digest('hex')
