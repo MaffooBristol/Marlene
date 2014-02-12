@@ -24,33 +24,35 @@ Sign up for an account at http://www.twitter.com. Go to dev.twitter.com and crea
 Modify data/keys.json with the secrets generated on dev.twitter.com - requires read/write permissions.
 
 ####Send a single tweet
-`node marlene`
-or
-`./marlene` (Note: you may have to run `chmod 770 marlene` to use this method)
+    node marlene
+    # Alternatively, you can run the executable directly.
+    # You may have to run `chmod 770 marlene` to use this method.
+    ./marlene
 
 * Add the `--dry-run` or `-d` flag to view the tweet you would have sent, without actually sending it. A bit like seeing the boat you could have won at the end of Bullseye. 
 
 Compiling from sauce
 ----
 If you're a saucy devil and want to get involved in the production of Marlene, fuck off! It's mine!
+
 I jest, of course.
 
 ####Install Jitter globally
-`sudo npm install -g jitter`
+    sudo npm install -g jitter
 
 ####Install Coffeescript globally
-`sudo npm install -g coffeescript`
+    sudo npm install -g coffeescript
 
 ####Pull down the repo
-`git clone git@github.com:MaffooBristol/Marlene "/path/to/Marlene"`
+    git clone git@github.com:MaffooBristol/Marlene "/path/to/Marlene"
 
 ####Install dependencies from NPM
-`cd /path/to/Marlene/`
-`npm install`
+    cd /path/to/Marlene/
+    npm install
 
 ####In a separate terminal, start Jitter to automatically compile Coffee into JS
-`jitter src/ lib/`
+    jitter src/ lib/
 
-Roadmap (0.0.1)
+Current version: 0.0.1 (Wogan's Run)
 ----
-A lot more things will be added in the future, mainly DB stuff so the same tweet is not replied to more than once, the triggers and responses are a bit more seemingly random. That kinda thing.
+![Woooooogaaaaaaan!](http://i.telegraph.co.uk/multimedia/archive/01450/terry-hitsout_1450974c.jpg)
