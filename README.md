@@ -23,7 +23,14 @@ Usage
 Sign up for an account at http://www.twitter.com. Go to dev.twitter.com and create an application, it's unimportant what you call it. Make sure you generate both access tokens and customer tokens; there should be four tokens in total.
 Modify data/keys.json with the secrets generated on dev.twitter.com - requires read/write permissions.
 
-####Send a single tweet
+####Pull down the repo
+    git clone git@github.com:MaffooBristol/Marlene "/path/to/Marlene"
+
+####Install dependencies from NPM
+    cd /path/to/Marlene/
+    npm install
+
+####Send a single Tweet
     node marlene
     # Alternatively, you can run the executable directly.
     # You may have to run `chmod 770 marlene` to use this method.
@@ -42,13 +49,6 @@ I jest, of course.
 
 ####Install Coffeescript globally
     sudo npm install -g coffee-script
-
-####Pull down the repo
-    git clone git@github.com:MaffooBristol/Marlene "/path/to/Marlene"
-
-####Install dependencies from NPM
-    cd /path/to/Marlene/
-    npm install
 
 ####In a separate terminal, start Jitter to automatically compile Coffee into JS
     jitter src/ lib/
