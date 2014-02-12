@@ -1,0 +1,40 @@
+{
+  "name": "Marlene",
+  "version": "0.0.1",
+  "description": "The new senstation in BeaverBots(tm).",
+  "main": "marlene",
+  "dependencies": {
+    "js-yaml": "~3.0.1",
+    "cron": "~1.0.1",
+    "jQuery": "~1.7.4",
+    "mongojs": "~0.10.0",
+    "express": "~3.4.8",
+    "twit": "~1.1.12",
+    "optimist": "~0.6.0"
+  },
+  "devDependencies": {
+    "coffee-script": "~1.6.3"
+  },
+  "scripts": {
+    "test": "./marlene --dry-run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MaffooBristol/Marlene.git"
+  },
+  "keywords": [
+    "Marlene",
+    "Twitter",
+    "Bot",
+    "Beaver",
+    "Maffoo",
+    "Seahorses"
+  ],
+  "author": "Matt Fletcher & Rob Jacob",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MaffooBristol/Marlene/issues"
+  },
+  "homepage": "https://github.com/MaffooBristol/Marlene"
+}
+

@@ -26,8 +26,8 @@ module.exports =
     _phraseNamesQuoted = _phraseNames.map((a) -> return '"' + a + '"')
     _randomIndex = parseInt(Math.random() * _phraseNames.length)
 
-    twit.get 'statuses/mentions_timeline', q: '@teslacool1', (err, data) ->
-      console.log data
+    # twit.get 'statuses/mentions_timeline', q: '@teslacool1', (err, data) ->
+      # console.log data
 
     twit.get 'search/tweets', q: _phraseNamesQuoted[_randomIndex], (err, data) ->
       unless data? and data.statuses? then return false
