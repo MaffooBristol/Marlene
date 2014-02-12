@@ -4,6 +4,7 @@ fs      = require 'fs'
 twitter = require 'twit'
 argv    = require('optimist').argv
 yaml    = require('js-yaml')
+rollbar = require('rollbar')
 
 secrets = require '../data/secrets.json'
 phrases = yaml.safeLoad fs.readFileSync(require('path').resolve(__dirname, '../data/phrases.yaml'), 'utf8')
@@ -22,6 +23,10 @@ searchTerms = (Object.keys phrases.phrases).map((a) -> return '"' + a + '"').joi
 
 module.exports =
   twitter: () ->
+
+    rollbar.init secrets.rollbar
+    rollbar.reportMessage 'Initialising Marlene...'
+
     _phraseNames = (Object.keys phrases.phrases)
     _phraseNamesQuoted = _phraseNames.map((a) -> return '"' + a + '"')
     _randomIndex = parseInt(Math.random() * _phraseNames.length)
@@ -52,11 +57,13 @@ module.exports =
         db.tweets.find {in_reply_to_status_id: tweet.id_str, sent: true}, (err, data) ->
          if (data.length > 0)
            console.log '\nAlready seen tweet, skipping.'
+           rollbar.reportMessage 'Already seen tweet, skipping: ' + tweet.user.name + ': ' + tweet.text
            db.close()
            return
 
           if argv['dry-run']? or argv.d
             console.log '\nYou\'ve set the dry-run flag; tweet NOT sent.'
+            rollbar.reportMessage 'Dry run: ' + tweet.text + ' / ' + _response
           else
             twit.post 'statuses/update',
               # Set post parameters.
@@ -69,12 +76,14 @@ module.exports =
   #                dbRecord.tweet_id =
                   console.log 'Tweet sent to ' + tweet.user.name + '\n'
                   console.log 'Replied to ' + tweet.in_reply_to_status_id_str + '\n'
+                  rollbar.reportMessage 'Tweet sent to ' + tweet.user.name + ': ' + tweet.text + ' / ' + _response
 
           dbRecord.in_reply_to_status_id = tweet.id_str
           dbRecord.complete = Math.round(new Date().getTime() / 100)
           db.tweets.save dbRecord, (err) ->
             console.log err
           db.close()
+          rollbar.shutdown()
 
         # Ignore others.
         break

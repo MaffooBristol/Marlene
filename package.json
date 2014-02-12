@@ -10,7 +10,8 @@
     "mongojs": "~0.10.0",
     "express": "~3.4.8",
     "twit": "~1.1.12",
-    "optimist": "~0.6.0"
+    "optimist": "~0.6.0",
+    "rollbar": "*"
   },
   "devDependencies": {
     "coffee-script": "~1.6.3"
