@@ -3,8 +3,9 @@ os      = require 'os'
 fs      = require 'fs'
 twitter = require 'twit'
 argv    = require('optimist').argv
-yaml    = require('js-yaml')
-rollbar = require('rollbar')
+yaml    = require 'js-yaml'
+rollbar = require 'rollbar'
+crypto  = require 'crypto'
 
 secrets = require '../data/secrets.json'
 phrases = yaml.safeLoad fs.readFileSync(require('path').resolve(__dirname, '../data/phrases.yaml'), 'utf8')
@@ -79,6 +80,9 @@ module.exports =
                   rollbar.reportMessage 'Tweet sent to ' + tweet.user.name + ': ' + tweet.text + ' / ' + _response
 
           dbRecord.in_reply_to_status_id = tweet.id_str
+          dbRecord.tweet_text = crypto.createHash('md5').update(tweet.text).digest('hex')
+          dbRecord.response = crypto.createHash('md5').update(_response).digest('hex')
+          dbRecord.trigger = crypto.createHash('md5').update(_trigger).digest('hex')
           dbRecord.complete = Math.round(new Date().getTime() / 100)
           db.tweets.save dbRecord, (err) ->
             console.log err
