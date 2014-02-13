@@ -1,4 +1,4 @@
-Marlene
+Marlene [![Build Status](https://travis-ci.org/MaffooBristol/Marlene.png?branch=master)](https://travis-ci.org/MaffooBristol/Marlene)
 =======
 The new sensation in BeaverBots.
 
