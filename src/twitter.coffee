@@ -27,7 +27,11 @@ searchTerms = (Object.keys phrases.phrases).map((a) -> return '"' + a + '"').joi
 module.exports =
   twitter: () ->
 
-    rollbar.init secrets.rollbar
+    if secrets.rollbar?
+      rollbar.init secrets.rollbar
+    else
+      console.log 'Please '
+      rollbar.reportMessage = {}
     rollbar.reportMessage 'Initialising Marlene...'
 
     _phraseNames = (Object.keys phrases.phrases)
