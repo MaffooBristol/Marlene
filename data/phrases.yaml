@@ -83,4 +83,37 @@
       responses:
         - "'laughing aloud to myself'"
         - "I'm glad you think it's funny"
+    -
+      triggers:
+        - "who are you?"
+        - "who the fuck are you?"
+        - "who r u"
+        - "who you are"
+        - "who are u"
+        - "who u r"
+        - "hu r u"
+      responses:
+        - "I'm Jeremy Beadle's ghost- who do you think I am?"
+        - "I'm what dreams are made of."
+        - "I'm [name]! Isn't that obvious?"
+        - "I don't know, who are you?"
+        - "Who are you?"
+        - "Have a guess who I am!"
+    -
+      triggers:
+        - "You're a towel"
+      responses:
+        - "No, you're a towel!"
+    -
+      triggers:
+        - "What are you talking about?"
+      responses:
+        - "I'm talking about... beavers?"
+        - "What are YOU talking about?"
+        - "I don't that's any of your business!"
+    -
+      triggers:
+        - "Cunt"
+      responses:
+        - "Makes sense."
 

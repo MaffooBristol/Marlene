@@ -11,7 +11,8 @@
     "express": "~3.4.8",
     "twit": "~1.1.12",
     "optimist": "~0.6.0",
-    "rollbar": "*"
+    "rollbar": "*",
+    "moment": "~2.5.1"
   },
   "devDependencies": {
     "coffee-script": "~1.6.3"
@@ -38,4 +39,3 @@
   },
   "homepage": "https://github.com/MaffooBristol/Marlene"
 }
-
