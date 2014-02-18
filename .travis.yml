@@ -6,6 +6,7 @@ before_script:
   - sudo apt-get install curl
 
 script:
+  - npm test
   - ACCESS_TOKEN=fd958309d7924453a2f257069881d9ba
   - ENVIRONMENT=marlene_test
   - LOCAL_USERNAME=`whoami`
