@@ -141,6 +141,7 @@ module.exports =
       switch argv.method
        when 'reply'
           _self.twit.get 'statuses/mentions_timeline', count: 100, (err, data) ->
+            # console.log data
             if err
               _error = 'Error! [' + err.statusCode + '] ' + err.message
               console.log ' > ' + _error
@@ -153,7 +154,9 @@ module.exports =
                     _response = reply.responses[Math.floor(Math.random() * reply.responses.length)]
                     _now = moment()
                     _then = moment(mention.created_at)
-                    if _now.diff(_then, 'days') < 7 then _self.sendTweet mention, trigger, _response
+                    if _now.diff(_then, 'days') < 7
+                      _self.sendTweet mention, trigger, _response
+                      return
 
         when 'observe'
           _self.userStream = _self.twit.stream 'statuses/filter', {track: '@' + _self.myScreenName, replies: 'all'}
