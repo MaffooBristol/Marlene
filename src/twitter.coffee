@@ -8,6 +8,7 @@ rollbar = require 'rollbar'
 crypto  = require 'crypto'
 moment  = require 'moment'
 clc     = require 'cli-color'
+restler = require 'restler'
 db      = require('mongojs').connect('marlene', ['tweets'])
 
 secrets = if (argv.secrets?) then require '../data/' + argv.secrets else require '../data/secrets.json'
@@ -97,10 +98,10 @@ module.exports =
     _self.twit = new twitter secrets
 
     _self.timeoutCounter = setTimeout () ->
-      console.log emphasise(" > (5s) It's all taking rather a long time...")
+      console.log " > (5s) It's all taking rather a long time..."
       clearTimeout _self.timeoutCounter
       _self.timeoutCounter = setTimeout () ->
-        console.log " > (15s) Fuck this shit, aborting..."
+        console.log error(" > (15s) Fuck this shit, aborting...")
         clearTimeout _self.timeoutCounter
         _self.finalise(1)
       , 10000
@@ -131,7 +132,7 @@ module.exports =
       _self.myScreenName = data.screen_name
 
 
-      if !argv? then argv = method: 'intrude'
+      if !argv.method? then argv.method = 'intrude'
 
       switch argv.method
        when 'reply'
@@ -178,13 +179,21 @@ module.exports =
                   continue
                 console.log '\n > Matched on ' + emphasise(k)
                 rollbar.reportMessage 'Matched on ' + k
+                _response = j.responses[Math.floor(Math.random() * j.responses.length)]
+                if secrets.restler_url?
+                  console.log ' > Sending webhook to Zapier via Restler'
+                  restler.post secrets.restler_url, data:
+                    tweet: tweet
+                    trigger: k
+                    response: _response
 
                 console.log ' > Parrying mention/direct reply...'
-                _self.sendTweet tweet, k, j.responses[Math.floor(Math.random() * j.responses.length)], true
+                _self.sendTweet tweet, k, _response, true
 
                 return
 
         when 'intrude'
+          console.log ' > Intruding...'
           _self.twit.get 'search/tweets', q: _phraseNamesQuoted[_randomIndex], (err, data) ->
             if err
               _error = 'Error! [' + err.statusCode + '] ' + err.message
