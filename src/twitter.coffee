@@ -11,6 +11,10 @@ clc     = require 'cli-color'
 restler = require 'restler'
 db      = require('mongojs').connect('marlene', ['tweets'])
 
+if argv.test
+  console.log " > No testing platform yet, so let's say it's all okay ;)"
+  process.exit(0)
+
 secrets = if (argv.secrets?) then require '../data/' + argv.secrets else require '../data/secrets.json'
 
 _phrases = if (argv.phrases?) then '../data/' + argv.phrases else '../data/phrases.yaml'
@@ -73,7 +77,7 @@ module.exports =
         return
 
       if argv['dry-run']? or argv.d
-        console.log '\n > You\'ve set the dry-run flag; tweet NOT sent.'
+        console.log ' > You\'ve set the dry-run flag; tweet NOT sent.'
         rollbar.reportMessage 'Dry run: ' + tweet.text + ' / ' + _response
         _self.saveDBRecord(tweet, _trigger, _response)
         _self.finalise() unless _noFinalise
