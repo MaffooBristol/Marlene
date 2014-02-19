@@ -7,6 +7,7 @@ yaml    = require 'js-yaml'
 rollbar = require 'rollbar'
 crypto  = require 'crypto'
 moment  = require 'moment'
+clc     = require 'cli-color'
 db      = require('mongojs').connect('marlene', ['tweets'])
 
 secrets = if (argv.secrets?) then require '../data/' + argv.secrets else require '../data/secrets.json'
@@ -22,6 +23,11 @@ dbRecord =
   hostname: os.hostname()
   sent: false
 
+error     = clc.red.bold
+warn      = clc.yellow
+notice    = clc.blue
+emphasise = clc.bold
+
 module.exports =
 
   parseResponse: (text) ->
@@ -30,13 +36,13 @@ module.exports =
 
   finalise: (_exitCode) ->
     _exitCode = _exitCode or 0
-    console.log 'Shutting down...'
+    console.log ' > Shutting down...'
     db.close()
     rollbar.shutdown()
     if _exitCode == 0
-      console.log 'Done! Everything seemed to go okay :)'
+      console.log ' > Done! Everything seemed to go okay :)\n'
     else
-      console.log "Done... but something went horribly wrong, it seems :("
+      console.log " > Done... but something went horribly wrong, it seems :(\n"
     process.exit(_exitCode)
     return
 
@@ -48,28 +54,28 @@ module.exports =
     dbRecord.complete = Math.round(new Date().getTime() / 100)
     db.tweets.save dbRecord, (err) ->
       console.log err
-    console.log 'Saved DB Record.'
+    console.log ' > Saved DB Record.'
 
-  sendTweet: (tweet, _trigger, _response) ->
+  sendTweet: (tweet, _trigger, _response, _noFinalise) ->
 
     _self = @
+    _noFinalise = _noFinalise or false
 
     _response = @parseResponse _response
 
-    console.log '\n\t- Unique ID:\t' + tweet.id + '\n\t- Tweet:\t' + tweet.text.replace('\n', '') + '\n\t- Trigger:\t' + _trigger + '\n\t- Response:\t' + _response
-
     db.tweets.find {in_reply_to_status_id: tweet.id_str, sent: true}, (err, data) ->
+      console.log '\n > - Unique ID:\t' + tweet.id + '\n > - Trigger:\t' + _trigger + '\n > - Tweet:\t' + tweet.text.replace('\n', '') + '\n > - Response:\t' + emphasise(_response) + '\n'
       if data? and data.length > 0
-        console.log '\nAlready seen tweet, skipping.'
+        console.log ' > Already seen tweet, skipping.'
         rollbar.reportMessage 'Already seen tweet, skipping: ' + tweet.user.name + ': ' + tweet.text
-        _self.finalise
+        _self.finalise() unless _noFinalise
         return
 
       if argv['dry-run']? or argv.d
-        console.log '\nYou\'ve set the dry-run flag; tweet NOT sent.'
+        console.log '\n > You\'ve set the dry-run flag; tweet NOT sent.'
         rollbar.reportMessage 'Dry run: ' + tweet.text + ' / ' + _response
         _self.saveDBRecord(tweet, _trigger, _response)
-        _self.finalise()
+        _self.finalise() unless _noFinalise
       else
         _self.twit.post 'statuses/update',
           # Set post parameters.
@@ -79,12 +85,10 @@ module.exports =
           (err, data) ->
             if data.id
               dbRecord.sent = true
-
-              console.log 'Tweet sent to ' + tweet.user.name + '\n'
-              console.log 'Replied to ' + tweet.in_reply_to_status_id_str + '\n'
+              console.log ' > Tweet sent to ' + tweet.user.name + ' (@' + tweet.user.screen_name + ') / ' + (tweet.in_reply_to_status_id or tweet.in_reply_to_status_id_str)
               rollbar.reportMessage 'Tweet sent to ' + tweet.user.name + ': ' + tweet.text + ' / ' + _response
               _self.saveDBRecord(tweet, _trigger, _response)
-              _self.finalise()
+              _self.finalise() unless _noFinalise
 
   twitter: () ->
 
@@ -93,12 +97,12 @@ module.exports =
     _self.twit = new twitter secrets
 
     _self.timeoutCounter = setTimeout () ->
-      console.log "(5s) It's all taking rather a long time..."
+      console.log emphasise(" > (5s) It's all taking rather a long time...")
       clearTimeout _self.timeoutCounter
       _self.timeoutCounter = setTimeout () ->
-        console.log "(15s) Fuck this shit, aborting..."
+        console.log " > (15s) Fuck this shit, aborting..."
         clearTimeout _self.timeoutCounter
-        _self.finalise()
+        _self.finalise(1)
       , 10000
     , 5000
 
@@ -119,55 +123,93 @@ module.exports =
     _self.twit.get 'account/verify_credentials', (err, data) ->
       if err
         _error = 'Error! [' + err.statusCode + '] ' + err.message
-        console.log _error
+        console.log ' > ' + _error
         throw new Error _error
         return
-      console.log 'Running Marlene as ' + data.name + '.'
+      console.log ' > Running Marlene as ' + data.name + '.'
       _self.myName = data.name
-
-      _self.twit.get 'statuses/mentions_timeline', count: 100, (err, data) ->
-        if err
-          _error = 'Error! [' + err.statusCode + '] ' + err.message
-          console.log _error
-          throw new Error _error
-          return
-        for mention in data
-          # console.log mention.created_at + ' ' + mention.text
-          # console.log mention.text
-          for reply in phrases.replies
-            for trigger in reply.triggers
-              if mention.text.toLowerCase().indexOf(trigger.toLowerCase()) > -1
-                _response = reply.responses[Math.floor(Math.random() * reply.responses.length)]
-                _now = moment()
-                _then = moment(mention.created_at)
-                if _now.diff(_then, 'days') < 7 then _self.sendTweet mention, trigger, _response
+      _self.myScreenName = data.screen_name
 
 
-      _self.twit.get 'search/tweets', q: _phraseNamesQuoted[_randomIndex], (err, data) ->
-        if err
-          _error = 'Error! [' + err.statusCode + '] ' + err.message
-          console.log _error
-          throw new Error _error
-          return
-        unless data? and data.statuses? then return false
-        for tweet in data.statuses
+      if !argv? then argv = method: 'intrude'
 
-          # I *think* this is if the tweet itself has been retweeted, will investigate further.
-          # if tweet.retweetedCount > 0 then continue
+      switch argv.method
+       when 'reply'
+          _self.twit.get 'statuses/mentions_timeline', count: 100, (err, data) ->
+            if err
+              _error = 'Error! [' + err.statusCode + '] ' + err.message
+              console.log ' > ' + _error
+              throw new Error _error
+              return
+            for mention in data
+              for reply in phrases.replies
+                for trigger in reply.triggers
+                  if mention.text.toLowerCase().indexOf(trigger.toLowerCase()) > -1
+                    _response = reply.responses[Math.floor(Math.random() * reply.responses.length)]
+                    _now = moment()
+                    _then = moment(mention.created_at)
+                    if _now.diff(_then, 'days') < 7 then _self.sendTweet mention, trigger, _response
 
-          # Skip retweeted.
-          if tweet.retweeted_status? then continue
+        when 'observe'
+          _self.userStream = _self.twit.stream 'statuses/filter', {track: '@' + _self.myScreenName, replies: 'all'}
 
-          # Sometimes RTs get through because of strange things involving quotes
-          # and stuff, so best just to ignore them.
-          if tweet.text.indexOf('RT') > -1 then continue
+          console.log ' > Observing direct mentions...'
 
-          _trigger = _phraseNames[_randomIndex]
-          _allResponses = phrases.phrases[_trigger]
-          _response = _allResponses[Math.floor(Math.random() * _allResponses.length)]
+          clearTimeout(_self.timeoutCounter)
+          # Uncomment to force aborting after 30 seconds.
+          # _self.timeoutCounter = setTimeout () ->
+          #   console.log " > (30s) Fuck this shit, aborting..."
+          #   clearTimeout _self.timeoutCounter
+          #   _self.finalise(1)
+          # , 25000
+          _self.userStream.on 'tweet', (tweet) ->
+            if _self.timeoutCounter._idleTimeout > -1
+              clearTimeout(_self.timeoutCounter)
+            _text = tweet.text.replace("\n", '')
+            _output = ' > '
+            _output += tweet.user.name
+            for i in [0..14-tweet.user.screen_name.length]
+              _output += ' '
+            console.log _output + _text
 
-          _self.sendTweet(tweet, _trigger, _response)
+            for j in phrases.replies
+              for k in j.triggers
+                unless _text.toLowerCase().indexOf(k.toLowerCase()) > -1
+                  continue
+                console.log '\n > Matched on ' + emphasise(k)
+                rollbar.reportMessage 'Matched on ' + k
 
-          # Ignore others.
-          break
+                console.log ' > Parrying mention/direct reply...'
+                _self.sendTweet tweet, k, j.responses[Math.floor(Math.random() * j.responses.length)], true
+
+                return
+
+        when 'intrude'
+          _self.twit.get 'search/tweets', q: _phraseNamesQuoted[_randomIndex], (err, data) ->
+            if err
+              _error = 'Error! [' + err.statusCode + '] ' + err.message
+              console.log ' > ' + _error
+              throw new Error _error
+              return
+            unless data? and data.statuses? then return false
+            for tweet in data.statuses
+
+              # I *think* this is if the tweet itself has been retweeted, will investigate further.
+              # if tweet.retweetedCount > 0 then continue
+
+              # Skip retweeted.
+              if tweet.retweeted_status? then continue
+
+              # Sometimes RTs get through because of strange things involving quotes
+              # and stuff, so best just to ignore them.
+              if tweet.text.indexOf('RT') > -1 then continue
+
+              _trigger = _phraseNames[_randomIndex]
+              _allResponses = phrases.phrases[_trigger]
+              _response = _allResponses[Math.floor(Math.random() * _allResponses.length)]
+
+              _self.sendTweet(tweet, _trigger, _response)
+
+              # Ignore others.
+              break
 

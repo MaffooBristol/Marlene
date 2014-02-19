@@ -44,6 +44,7 @@ Alternatively, you can run the executable directly. You may have to run `chmod 7
 * `--dry-run` or `-d`: View the tweet you would have sent, without actually sending it. A bit like seeing the boat you could have won at the end of Bullseye.
 * `--secrets=file.json` or `-s=file.json`: Select the JSON file in which your secrets and keys etc are kept.
 * `--phrases=file.yaml` or `-p=file.yaml`: Select the YAML file in which the triggers/responses are defined.
+* `--method`: One of `intrude`, for single phrase search mode; `reply`, for looking for replies to respond to; or `observe` for leaving a socket open to manually wait for replies and respond to them.
 
 Compiling from sauce
 ----
